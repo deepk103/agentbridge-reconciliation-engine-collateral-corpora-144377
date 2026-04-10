@@ -1,0 +1,162 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+
+packages:
+  - docker.io
+  - docker-compose
+  - nginx
+  - certbot
+  - python3-certbot-nginx
+  - htop
+  - curl
+  - wget
+  - git
+  - jq
+  - unzip
+
+runcmd:
+  # Docker setup
+  - systemctl start docker
+  - systemctl enable docker
+  - usermod -aG docker root
+
+  # AgentBridge directory structure
+  - mkdir -p /opt/agentbridge/{config,data,logs,backups}
+
+  # Business function configuration (6-layer agentic architecture)
+  - |
+    cat > /opt/agentbridge/config/business-function.json << 'BFEOF'
+    {
+      "blueprintName": "Reconciliation Engine • Collateral (Corporate Banking)",
+      "environment": "production",
+      "agenticLayers": {
+        "reasoning": "gpt-4o",
+        "orchestration": "n8n",
+        "protocol": "MCP",
+        "governance": "OPA",
+        "observability": "Prometheus",
+        "intelligence": "vector-db"
+      },
+      "provider": "gcp",
+      "region": "us-central1",
+      "instanceType": "e2-medium",
+      "createdAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    }
+    BFEOF
+
+  # AI Orchestration config (populated by Terraform outputs or unified deploy)
+  - |
+    cat > /opt/agentbridge/config/ai-orchestration.json << 'AIEOF'
+    {
+      "provider": "vertex",
+      "enabled": false,
+      "flowArn": "${AI_ORCH_FLOW_ARN:-}",
+      "flowAliasId": "${AI_ORCH_FLOW_ALIAS:-}",
+      "endpoint": "${AI_ORCH_ENDPOINT:-}",
+      "agentName": "${AI_ORCH_AGENT_NAME:-}",
+      "projectId": "${AI_ORCH_PROJECT_ID:-}",
+      "region": "us-central1"
+    }
+    AIEOF
+
+  # Docker Compose for n8n + PostgreSQL orchestration layer
+  - |
+    cat > /opt/agentbridge/docker-compose.yml << 'DCEOF'
+    version: '3.8'
+    services:
+      postgres:
+        image: postgres:16
+        environment:
+          POSTGRES_DB: n8n
+          POSTGRES_USER: n8n
+          POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_in_production}
+        volumes:
+          - postgres_data:/var/lib/postgresql/data
+        restart: unless-stopped
+        healthcheck:
+          test: ["CMD-SHELL", "pg_isready -U n8n"]
+          interval: 10s
+          timeout: 5s
+          retries: 5
+
+      n8n:
+        image: n8nio/n8n:latest
+        environment:
+          DB_TYPE: postgresdb
+          DB_POSTGRESDB_HOST: postgres
+          DB_POSTGRESDB_DATABASE: n8n
+          DB_POSTGRESDB_USER: n8n
+          DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD:-changeme_in_production}
+          N8N_HOST: ${N8N_HOST:-0.0.0.0}
+          WEBHOOK_URL: ${WEBHOOK_URL:-http://localhost:5678}
+          N8N_LOG_LEVEL: info
+          N8N_METRICS: "true"
+          N8N_DIAGNOSTICS_ENABLED: "false"
+        ports:
+          - "5678:5678"
+        volumes:
+          - n8n_data:/home/node/.n8n
+        depends_on:
+          postgres:
+            condition: service_healthy
+        restart: unless-stopped
+
+    volumes:
+      postgres_data:
+      n8n_data:
+    DCEOF
+
+  # Start services
+  - cd /opt/agentbridge && docker compose up -d
+
+  # Nginx reverse proxy
+  - |
+    cat > /etc/nginx/sites-available/agentbridge << 'NGEOF'
+    server {
+        listen 80;
+        server_name _;
+
+        location / {
+            proxy_pass http://localhost:5678;
+            proxy_set_header Host \$host;
+            proxy_set_header X-Real-IP \$remote_addr;
+            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto \$scheme;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade \$http_upgrade;
+            proxy_set_header Connection "upgrade";
+        }
+
+        location /health {
+            return 200 '{"status":"healthy","blueprint":"Reconciliation Engine • Collateral (Corporate Banking)","provider":"gcp"}';
+            add_header Content-Type application/json;
+        }
+
+        location /api/ {
+            proxy_pass http://localhost:3000/;
+            proxy_set_header Host \$host;
+            proxy_set_header X-Real-IP \$remote_addr;
+        }
+    }
+    NGEOF
+
+  - ln -sf /etc/nginx/sites-available/agentbridge /etc/nginx/sites-enabled/default
+  - systemctl restart nginx
+  - systemctl enable nginx
+
+  # Health check cron (every 5 minutes)
+  - |
+    cat > /opt/agentbridge/healthcheck.sh << 'HCEOF'
+    #!/bin/bash
+    STATUS=$(curl -sf http://localhost/health | jq -r .status 2>/dev/null)
+    if [ "$STATUS" != "healthy" ]; then
+      echo "$(date): Health check FAILED" >> /opt/agentbridge/logs/health.log
+      cd /opt/agentbridge && docker compose restart
+    else
+      echo "$(date): OK" >> /opt/agentbridge/logs/health.log
+    fi
+    HCEOF
+  - chmod +x /opt/agentbridge/healthcheck.sh
+  - echo "*/5 * * * * /opt/agentbridge/healthcheck.sh" | crontab -
+
