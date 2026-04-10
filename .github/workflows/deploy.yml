@@ -1,0 +1,11 @@
+name: Deploy Workflow
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to n8n
+        run: echo "Deploy workflow to n8n instance"
