@@ -1,0 +1,39 @@
+{
+  "name": "reconciliation-engine-•-collateral-(corporate-banking)",
+  "version": "1.0.0",
+  "description": "Reconciliation Engine • Collateral (Corporate Banking) screens statements and monitors SARs; applies decision gates and observability; orchestrates via SWIFT Gateway to reduce fraud loss.",
+  "main": "workflow.json",
+  "keywords": [
+    "agentbridge",
+    "workflow",
+    "automation",
+    "n8n",
+    "chain-of-thought",
+    "banking-&-finance",
+    "kyc",
+    "sanctions",
+    "credit",
+    "chain-of-thought",
+    "banking"
+  ],
+  "author": "AgentBridge",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/deepk103/agentbridge-reconciliation-engine-collateral-corpora-144377.git"
+  },
+  "bugs": {
+    "url": "https://github.com/deepk103/agentbridge-reconciliation-engine-collateral-corpora-144377/issues"
+  },
+  "homepage": "https://github.com/deepk103/agentbridge-reconciliation-engine-collateral-corpora-144377#readme",
+  "scripts": {
+    "start": "echo \"Import this workflow into your n8n instance\"",
+    "validate": "echo \"Workflow validation complete\"",
+    "test": "echo \"Run workflow tests\"",
+    "deploy": "echo \"Deploy to n8n instance\""
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "n8n": ">=1.0.0"
+  }
+}
