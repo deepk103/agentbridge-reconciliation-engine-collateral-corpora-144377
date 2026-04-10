@@ -1,0 +1,322 @@
+{
+  "id": "tpl-3961493377",
+  "name": "Reconciliation Engine • Collateral (Corporate Banking)",
+  "description": "Reconciliation Engine • Collateral (Corporate Banking) screens statements and monitors SARs; applies decision gates and observability; orchestrates via SWIFT Gateway to reduce fraud loss.",
+  "industry": "Banking & Finance",
+  "pattern": "Chain-of-Thought",
+  "complexity": "Beginner",
+  "rating": 4.3,
+  "downloads": 20201,
+  "favorites": 5331,
+  "executionTime": "12 min",
+  "tags": [
+    "kyc",
+    "sanctions",
+    "credit",
+    "chain-of-thought",
+    "banking"
+  ],
+  "steps": [
+    {
+      "id": "intake",
+      "name": "Case Intake",
+      "description": "Collect, validate and normalize customer profiles from Sanctions Lists; attach a runId and timestamp for traceability."
+    },
+    {
+      "id": "reason-0",
+      "name": "Reason",
+      "description": "Execute reason phase for the Chain-of-Thought pattern: persist interim state, enforce guardrails, and emit structured JSON results."
+    },
+    {
+      "id": "decide-1",
+      "name": "Decide",
+      "description": "Execute decide phase for the Chain-of-Thought pattern: persist interim state, enforce guardrails, and emit structured JSON results."
+    },
+    {
+      "id": "break-resolution-0",
+      "name": "Break Resolution",
+      "description": "Break Resolution across joined datasets; branch on thresholds using decision gates; write metrics (success/error counts) for observability."
+    },
+    {
+      "id": "case-management-1",
+      "name": "Case Management",
+      "description": "Case Management across joined datasets; branch on thresholds using decision gates; write metrics (success/error counts) for observability."
+    },
+    {
+      "id": "risk-scoring-2",
+      "name": "Risk Scoring",
+      "description": "Risk Scoring across joined datasets; branch on thresholds using decision gates; write metrics (success/error counts) for observability."
+    },
+    {
+      "id": "finalize",
+      "name": "Operations Handoff",
+      "description": "Assemble final payload with status, artifacts, KPIs and audit trail; store to SWIFT Gateway; return response JSON for the client."
+    }
+  ],
+  "nodes": [
+    {
+      "id": "intake",
+      "type": "agentbridge",
+      "data": {
+        "label": "Case Intake",
+        "description": "Collect, validate and normalize customer profiles from Sanctions Lists; attach a runId and timestamp for traceability.",
+        "nodeType": "input",
+        "category": "ai-models",
+        "executionMode": "autonomous"
+      },
+      "position": {
+        "x": 60,
+        "y": 120
+      }
+    },
+    {
+      "id": "reason-0",
+      "type": "agentbridge",
+      "data": {
+        "label": "Reason",
+        "description": "Execute reason phase for the Chain-of-Thought pattern: persist interim state, enforce guardrails, and emit structured JSON results.",
+        "nodeType": "llm",
+        "category": "ai-models",
+        "executionMode": "autonomous"
+      },
+      "position": {
+        "x": 310,
+        "y": 120
+      }
+    },
+    {
+      "id": "decide-1",
+      "type": "agentbridge",
+      "data": {
+        "label": "Decide",
+        "description": "Execute decide phase for the Chain-of-Thought pattern: persist interim state, enforce guardrails, and emit structured JSON results.",
+        "nodeType": "llm",
+        "category": "ai-models",
+        "executionMode": "autonomous"
+      },
+      "position": {
+        "x": 560,
+        "y": 120
+      }
+    },
+    {
+      "id": "break-resolution-0",
+      "type": "agentbridge",
+      "data": {
+        "label": "Break Resolution",
+        "description": "Break Resolution across joined datasets; branch on thresholds using decision gates; write metrics (success/error counts) for observability.",
+        "nodeType": "llm",
+        "category": "ai-models",
+        "executionMode": "autonomous"
+      },
+      "position": {
+        "x": 810,
+        "y": 120
+      }
+    },
+    {
+      "id": "case-management-1",
+      "type": "agentbridge",
+      "data": {
+        "label": "Case Management",
+        "description": "Case Management across joined datasets; branch on thresholds using decision gates; write metrics (success/error counts) for observability.",
+        "nodeType": "llm",
+        "category": "ai-models",
+        "executionMode": "autonomous"
+      },
+      "position": {
+        "x": 1060,
+        "y": 120
+      }
+    },
+    {
+      "id": "risk-scoring-2",
+      "type": "agentbridge",
+      "data": {
+        "label": "Risk Scoring",
+        "description": "Risk Scoring across joined datasets; branch on thresholds using decision gates; write metrics (success/error counts) for observability.",
+        "nodeType": "llm",
+        "category": "ai-models",
+        "executionMode": "autonomous"
+      },
+      "position": {
+        "x": 1310,
+        "y": 120
+      }
+    },
+    {
+      "id": "finalize",
+      "type": "agentbridge",
+      "data": {
+        "label": "Operations Handoff",
+        "description": "Assemble final payload with status, artifacts, KPIs and audit trail; store to SWIFT Gateway; return response JSON for the client.",
+        "nodeType": "output",
+        "category": "ai-models",
+        "executionMode": "autonomous"
+      },
+      "position": {
+        "x": 1560,
+        "y": 120
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-0",
+      "source": "intake",
+      "target": "reason-0",
+      "type": "agentbridge",
+      "data": {
+        "label": "flow"
+      }
+    },
+    {
+      "id": "edge-1",
+      "source": "reason-0",
+      "target": "decide-1",
+      "type": "agentbridge",
+      "data": {
+        "label": "flow"
+      }
+    },
+    {
+      "id": "edge-2",
+      "source": "decide-1",
+      "target": "break-resolution-0",
+      "type": "agentbridge",
+      "data": {
+        "label": "flow"
+      }
+    },
+    {
+      "id": "edge-3",
+      "source": "break-resolution-0",
+      "target": "case-management-1",
+      "type": "agentbridge",
+      "data": {
+        "label": "flow"
+      }
+    },
+    {
+      "id": "edge-4",
+      "source": "case-management-1",
+      "target": "risk-scoring-2",
+      "type": "agentbridge",
+      "data": {
+        "label": "flow"
+      }
+    },
+    {
+      "id": "edge-5",
+      "source": "risk-scoring-2",
+      "target": "finalize",
+      "type": "agentbridge",
+      "data": {
+        "label": "flow"
+      }
+    }
+  ],
+  "preview": "Case Intake → Reason → Decide → Break Resolution → Case Management → Risk Scoring → Operations Handoff",
+  "featured": true,
+  "createdAt": "2025-04-14T17:05:18.112Z",
+  "author": "AgentBridge Team",
+  "deployments": 2065,
+  "lastDeployed": "2026-03-25T01:47:18.274Z",
+  "configuration": {
+    "provider": "azure",
+    "region": "us-west-2",
+    "compute": "cpu-optimized"
+  },
+  "healthStatus": "healthy",
+  "deploymentCount": 1014,
+  "githubRepo": "https://github.com/agentbridge/reconciliation-engine-•-collateral-(corporate-banking)",
+  "maintainer": "AgentBridge Team",
+  "agenticLayers": {
+    "reasoning": {
+      "modelType": "gpt-4o",
+      "reasoningPattern": "ReAct",
+      "contextWindow": 128000,
+      "memorySystem": "hybrid",
+      "decisionFramework": "Multi-Criteria Decision Analysis"
+    },
+    "orchestration": {
+      "workflowEngine": "n8n",
+      "coordinationPattern": "centralized",
+      "failoverStrategy": "retry",
+      "loadBalancing": "intelligent"
+    },
+    "protocol": {
+      "communicationProtocol": "MCP",
+      "messageFormat": "JSON",
+      "authenticationMethod": "OAuth2",
+      "encryptionStandard": "AES-256"
+    },
+    "governance": {
+      "policyEngine": "OPA",
+      "complianceStandards": [
+        "SOC2",
+        "GDPR"
+      ],
+      "auditTrail": true,
+      "riskAssessment": "medium",
+      "dataClassification": "internal"
+    },
+    "observability": {
+      "metricsCollection": "Prometheus",
+      "loggingFramework": "ELK",
+      "tracingSystem": "Jaeger",
+      "alertingRules": [],
+      "dashboardConfig": {
+        "layout": "grid",
+        "widgets": [
+          "metrics",
+          "logs",
+          "traces"
+        ],
+        "refreshInterval": 30
+      }
+    },
+    "intelligence": {
+      "learningCapability": "online",
+      "knowledgeBase": "vector-db",
+      "adaptationMechanism": "ml-based",
+      "performanceOptimization": "ai-driven"
+    }
+  },
+  "businessFunction": "data-preparation-node",
+  "autonomyLevel": "semi-autonomous",
+  "cognitiveCapabilities": [
+    {
+      "name": "Pattern Recognition",
+      "description": "Identifies patterns in business processes",
+      "confidenceLevel": 0.85,
+      "lastUpdated": "2026-04-10T17:05:18.134Z"
+    }
+  ],
+  "roiMetrics": {
+    "costSavings": 102852,
+    "timeReduction": 60,
+    "accuracyImprovement": 37,
+    "throughputIncrease": 54,
+    "errorReduction": 63
+  },
+  "complianceFramework": {
+    "standards": [
+      "SOC2",
+      "GDPR",
+      "ISO27001"
+    ],
+    "certifications": [
+      "SOC2 Type II"
+    ],
+    "auditFrequency": "monthly",
+    "lastAudit": "2026-03-25T21:15:41.670Z"
+  },
+  "scalingPolicy": {
+    "minInstances": 1,
+    "maxInstances": 10,
+    "scaleUpThreshold": 80,
+    "scaleDownThreshold": 20,
+    "cooldownPeriod": 300
+  }
+}
